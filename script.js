@@ -1,239 +1,25 @@
-// Work Schedule Manager App
-class WorkScheduleManager {
+// Mail Delivery Manager - Main Application Script
+
+class MailDeliveryManager {
     constructor() {
-        this.data = {
-            "Customer Contact List": [],
-            "Monday": [],
-            "Tuesday": [],
-            "Wednesday": [],
-            "Thursday": [],
-            "Friday": [],
-            "Adhoc": []
-        };
+        this.data = MailDeliveryData.getCurrentData();
         this.currentDay = 'Monday';
         this.currentTab = 'schedule';
+        this.searchTerm = '';
+        this.dayFilter = '';
+        this.serviceFilter = '';
         this.editingItem = null;
-        this.editingType = null;
-        this.editingIndex = null;
         
         this.initializeApp();
     }
 
     initializeApp() {
-        this.loadDefaultData();
-        this.loadFromStorage();
-        this.setupEventListeners();
+        this.bindEvents();
         this.renderCurrentView();
+        this.loadData();
     }
 
-    loadDefaultData() {
-        // Load the provided schedule data
-        if (window.COMPLETE_SCHEDULE_DATA) {
-            this.data = window.COMPLETE_SCHEDULE_DATA;
-            return;
-        }
-        
-        // Fallback to basic data
-        this.data = {
-            "Customer Contact List": [
-                {
-                    "Business Name": "Australia Post - Deepdene Business Centre",
-                    "Address": "106 Whitehorse Rd, Deepdene VIC 3103",
-                    "Contact Name": "Macca\r\nMarivick",
-                    "Customer Contact": "NA"
-                },
-                {
-                    "Business Name": "Kidman Partners",
-                    "Address": "Ground floor, Suite 4/255 Whitehorse Rd, Balwyn VIC 3103",
-                    "Contact Name": "Kaz",
-                    "Customer Contact": "03 9836 2900"
-                },
-                {
-                    "Business Name": "Australian Council for Educational Research (ACER)",
-                    "Address": "19 Prospect Hill Rd, Camberwell, VIC, 3124",
-                    "Contact Name": "Jay\r\nDavid",
-                    "Customer Contact": "0437 327 460\r\n0417 105 111",
-                    "Notes": "May text for express post envelope orders"
-                },
-                {
-                    "Business Name": "Australia Post - Camberwell Post Office",
-                    "Address": "2 Prospect Hill Road, Camberwell, VIC, 3124",
-                    "Contact Name": "Fabian\r\nNicky",
-                    "Customer Contact": "13 13 18"
-                },
-                {
-                    "Business Name": "Bank First",
-                    "Address": "117 Camberwell Rd, Hawthorn East VIC 3123",
-                    "Contact Name": "Donna",
-                    "Customer Contact": "0422 901 285"
-                },
-                {
-                    "Business Name": "Benjamin King Money",
-                    "Address": "LVL 4, 689 Burke Rd, Camberwell, VIC, 3124",
-                    "Contact Name": "Grace - Tues, Weds, Thurs\r\nPaula - Mon\r\nRach - Sometimes Mon / Fri",
-                    "Customer Contact": "0416 740 282\r\n03 9804 0411\r\n0447 385 682",
-                    "Notes": "May text for express post envelope orders"
-                },
-                {
-                    "Business Name": "Australia Post - Hawthorn Business Centre",
-                    "Address": "208 Riversdale Road, Hawthorn, VIC, 3122",
-                    "Contact Name": "Jess\r\nJohn\r\nTony",
-                    "Customer Contact": "0423 376 788"
-                },
-                {
-                    "Business Name": "Gorman Comercial",
-                    "Address": "LVL 1, 415 Riversdale Rd, Camberwell, VIC, 3124",
-                    "Contact Name": "Carmel\r\nDiana\r\nSharon",
-                    "Customer Contact": "0404 467 620\r\n0434 041 208\r\n0400 858 123",
-                    "Notes": "May text to collect registered post pickups in the afternoon"
-                },
-                {
-                    "Business Name": "Accru Melbourne",
-                    "Address": "50 Camberwell Rd, Camberwell, VIC, 3124",
-                    "Contact Name": "Abby",
-                    "Customer Contact": "03 9835 8200"
-                },
-                {
-                    "Business Name": "Australia Post - Hawthorn LPO",
-                    "Address": "783 Glenferrie Road, Hawthorn, VIC, 3122",
-                    "Contact Name": "Joanna",
-                    "Customer Contact": "0430 096 668"
-                }
-            ],
-            "Monday": [
-                {
-                    "Time": "7:40am",
-                    "Business Name": "Deepdene Business Centre",
-                    "Service": "Aus Post - Pickup",
-                    "Details": "1. Kidman Partners - PO Box 718 - Collect from PO Box using key on lanyard\r\n2. ACER - Locked Bag 55 - Collect from Collection Hatch\r\n4. Xavier College - Collect from collection hatch\r\n5. Bank First - PO Box 338 - Collect from collection hatch",
-                    "Address": "106 Whitehorse Rd, Deepdene, Vic, 3103",
-                    "Contact Name": "Macca & Mardi",
-                    "Customer Contact": "Not provided",
-                    "Parking Location": "Park in Car Park"
-                },
-                {
-                    "Time": "7:50am",
-                    "Business Name": "Kidman Partners",
-                    "Service": "Aus Post - Delivery",
-                    "Details": "Access office using fob on lanyard\r\nDeliver PO BOX 718 mail in tub to spot next to reception.\r\nTake tub and any mail in it.",
-                    "Address": "Ground floor, 255 Whitehorse Rd, Balwyn, Vic, 3103",
-                    "Contact Name": "Kaz",
-                    "Customer Contact": "03 9836 2900",
-                    "Parking Location": "Park in front of building on whitehorse road."
-                },
-                {
-                    "Time": "8:00am",
-                    "Business Name": "ACER",
-                    "Service": "Aus Post - Delivery",
-                    "Details": "Drop tub of mail addressed to ACER or Locked Bag 55in front of the roller door in the laneway.",
-                    "Address": "19 Prospect Hill Rd, Camberwell, VIC, 3124",
-                    "Contact Name": "Jay & David",
-                    "Customer Contact": "0437 327 460 & 0417 105 111",
-                    "Parking Location": "Despatch Roller Door in laneway"
-                },
-                {
-                    "Time": "11:40am",
-                    "Business Name": "Haighs Chocolate",
-                    "Service": "Secure Cash",
-                    "Details": "1. Collect Banking\r\n2. Do change order if one has been requested.",
-                    "Address": "715 Glenferrie Road, Hawthorn, VIC, 3122",
-                    "Contact Name": "Wade",
-                    "Customer Contact": "1300 424 447",
-                    "Parking Location": "Park on glenferrie road near shop where available parking"
-                },
-                {
-                    "Time": "12pm",
-                    "Business Name": "The Jolly Miller",
-                    "Service": "Secure Cash",
-                    "Details": "1. Collect Banking\r\n2. Do change order if one has been requested.\r\n3. Can do this anytime from 6am if convienent for you.",
-                    "Address": "315 Doncaster Road, Balwyn North, 3104",
-                    "Contact Name": "Gina & Moses",
-                    "Customer Contact": "(03) 9816 4603",
-                    "Parking Location": "Park in car park in front of the café"
-                }
-            ],
-            "Tuesday": [
-                {
-                    "Time": "7:40am",
-                    "Business Name": "Deepdene Business Centre",
-                    "Service": "Aus Post - Pickup",
-                    "Details": "1. Kidman Partners - PO Box 718 - Collect from PO Box using key on lanyard\r\n2. ACER - Locked Bag 55 - Collect from Collection Hatch\r\n4. Xavier College - Collect from collection hatch\r\n5. Bank First - PO Box 338 - Collect from collection hatch",
-                    "Address": "106 Whitehorse Rd, Deepdene, Vic, 3103",
-                    "Contact Name": "Macca & Mardi",
-                    "Customer Contact": "Not provided",
-                    "Parking Location": "Park in Car Park"
-                },
-                {
-                    "Time": "9:10am",
-                    "Business Name": "Noisette",
-                    "Service": "Secure Cash",
-                    "Details": "1. Collect Banking - Tuesday is the usual schedule day but double check with the email schedule from secure cash.",
-                    "Address": "2 Walpole St, Kew, VIC, 3101",
-                    "Contact Name": "Robert",
-                    "Customer Contact": "Not provided",
-                    "Parking Location": "Park on street in front of shop"
-                }
-            ],
-            "Wednesday": [
-                {
-                    "Time": "7:40am",
-                    "Business Name": "Deepdene Business Centre",
-                    "Service": "Aus Post - Pickup",
-                    "Details": "1. Kidman Partners - PO Box 718 - Collect from PO Box using key on lanyard\r\n2. ACER - Locked Bag 55 - Collect from Collection Hatch\r\n4. Xavier College - Collect from collection hatch\r\n5. Bank First - PO Box 338 - Collect from collection hatch",
-                    "Address": "106 Whitehorse Rd, Deepdene, Vic, 3103",
-                    "Contact Name": "Macca & Mardi",
-                    "Customer Contact": "Not provided",
-                    "Parking Location": "Park in Car Park"
-                }
-            ],
-            "Thursday": [
-                {
-                    "Time": "7:40am",
-                    "Business Name": "Deepdene Business Centre",
-                    "Service": "Aus Post - Pickup",
-                    "Details": "1. Kidman Partners - PO Box 718 - Collect from PO Box using key on lanyard\r\n2. ACER - Locked Bag 55 - Collect from Collection Hatch\r\n4. Xavier College - Collect from collection hatch\r\n5. Bank First - PO Box 338 - Collect from collection hatch",
-                    "Address": "106 Whitehorse Rd, Deepdene, Vic, 3103",
-                    "Contact Name": "Macca & Mardi",
-                    "Customer Contact": "Not provided",
-                    "Parking Location": "Park in Car Park"
-                }
-            ],
-            "Friday": [
-                {
-                    "Time": "7:40am",
-                    "Business Name": "Deepdene Business Centre",
-                    "Service": "Aus Post - Pickup",
-                    "Details": "1. Kidman Partners - PO Box 718 - Collect from PO Box using key on lanyard\r\n2. ACER - Locked Bag 55 - Collect from Collection Hatch\r\n4. Xavier College - Collect from collection hatch\r\n5. Bank First - PO Box 338 - Collect from collection hatch",
-                    "Address": "106 Whitehorse Rd, Deepdene, Vic, 3103",
-                    "Contact Name": "Macca & Mardi",
-                    "Customer Contact": "Not provided",
-                    "Parking Location": "Park in Car Park"
-                }
-            ],
-            "Adhoc": [
-                {
-                    "Business Name": "Next Smile Melbourne",
-                    "Service": "Secure Cash",
-                    "Days": "Ad-Hoc (Fridays)",
-                    "Address": "455-459 Auburn Rd, Hawthorn East, VIC, 3123",
-                    "Contact Name": "Not provided",
-                    "Customer Contact": "(03) 9826 1702",
-                    "Parking Location": "Park on street in front of building"
-                },
-                {
-                    "Business Name": "Slade Pharmacy",
-                    "Service": "Secure Cash",
-                    "Days": "Ad Hoc",
-                    "Address": "888 Toorak Rd, Camberwell, VIC, 3124",
-                    "Contact Name": "Not provided",
-                    "Customer Contact": "(03) 9852 5200",
-                    "Parking Location": "Park opposite well before intersection."
-                }
-            ]
-        };
-    }
-
-    setupEventListeners() {
+    bindEvents() {
         // Tab navigation
         document.querySelectorAll('.nav-tab').forEach(tab => {
             tab.addEventListener('click', (e) => {
@@ -241,28 +27,57 @@ class WorkScheduleManager {
             });
         });
 
-        // Day selection
+        // Day selector
         document.querySelectorAll('.day-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 this.switchDay(e.target.dataset.day);
             });
         });
 
-        // Search functionality
+        // Search and filters
         document.getElementById('searchInput').addEventListener('input', (e) => {
-            this.handleSearch(e.target.value);
+            this.searchTerm = e.target.value;
+            this.renderCurrentView();
         });
 
-        // Filter functionality
         document.getElementById('dayFilter').addEventListener('change', (e) => {
-            this.handleDayFilter(e.target.value);
+            this.dayFilter = e.target.value;
+            this.renderCurrentView();
         });
 
         document.getElementById('serviceFilter').addEventListener('change', (e) => {
-            this.handleServiceFilter(e.target.value);
+            this.serviceFilter = e.target.value;
+            this.renderCurrentView();
         });
 
-        // Modal handling
+        // Header actions
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            this.exportData();
+        });
+
+        document.getElementById('importBtn').addEventListener('click', () => {
+            this.importData();
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            this.resetData();
+        });
+
+        // Floating action button
+        document.getElementById('addEntryBtn').addEventListener('click', () => {
+            this.showAddModal();
+        });
+
+        // Tab-specific add buttons
+        document.getElementById('addContactBtn').addEventListener('click', () => {
+            this.showAddContactModal();
+        });
+
+        document.getElementById('addAdhocBtn').addEventListener('click', () => {
+            this.showAddAdhocModal();
+        });
+
+        // Modal events
         document.getElementById('closeModal').addEventListener('click', () => {
             this.closeModal();
         });
@@ -279,37 +94,12 @@ class WorkScheduleManager {
             this.deleteItem();
         });
 
-        // Import/Export
-        document.getElementById('exportBtn').addEventListener('click', () => {
-            this.exportData();
-        });
-
-        document.getElementById('importBtn').addEventListener('click', () => {
-            document.getElementById('fileInput').click();
-        });
-
+        // File input for import
         document.getElementById('fileInput').addEventListener('change', (e) => {
-            this.importData(e.target.files[0]);
+            this.handleFileImport(e);
         });
 
-        document.getElementById('resetBtn').addEventListener('click', () => {
-            this.resetToDefaultData();
-        });
-
-        // Add buttons
-        document.getElementById('addContactBtn').addEventListener('click', () => {
-            this.openAddModal('contact');
-        });
-
-        document.getElementById('addAdhocBtn').addEventListener('click', () => {
-            this.openAddModal('adhoc');
-        });
-
-        document.getElementById('addEntryBtn').addEventListener('click', () => {
-            this.openAddModal('schedule');
-        });
-
-        // Close modal when clicking outside
+        // Close modal on outside click
         document.getElementById('editModal').addEventListener('click', (e) => {
             if (e.target.id === 'editModal') {
                 this.closeModal();
@@ -320,31 +110,31 @@ class WorkScheduleManager {
     switchTab(tabName) {
         this.currentTab = tabName;
         
-        // Update active tab
+        // Update tab buttons
         document.querySelectorAll('.nav-tab').forEach(tab => {
             tab.classList.remove('active');
         });
         document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-
-        // Update active content
+        
+        // Update tab content
         document.querySelectorAll('.tab-content').forEach(content => {
             content.classList.remove('active');
         });
         document.getElementById(`${tabName}-tab`).classList.add('active');
-
+        
         this.renderCurrentView();
     }
 
     switchDay(day) {
         this.currentDay = day;
         
-        // Update active day button
+        // Update day buttons
         document.querySelectorAll('.day-btn').forEach(btn => {
             btn.classList.remove('active');
         });
         document.querySelector(`[data-day="${day}"]`).classList.add('active');
-
-        this.renderSchedule();
+        
+        this.renderCurrentView();
     }
 
     renderCurrentView() {
@@ -363,312 +153,234 @@ class WorkScheduleManager {
 
     renderSchedule() {
         const container = document.getElementById('scheduleContainer');
-        const dayData = this.data[this.currentDay] || [];
+        let scheduleItems = this.data.schedule[this.currentDay] || [];
         
-        if (dayData.length === 0) {
+        // Apply filters
+        scheduleItems = this.filterScheduleItems(scheduleItems);
+        
+        if (scheduleItems.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
-                    <i class="fas fa-calendar-times"></i>
-                    <h3>No schedule entries for ${this.currentDay}</h3>
-                    <p>Click the + button to add your first entry</p>
+                    <i class="fas fa-calendar-day"></i>
+                    <h3>No schedule items</h3>
+                    <p>No items found for ${this.currentDay}. Add some items to get started!</p>
                 </div>
             `;
             return;
         }
-
-        container.innerHTML = dayData.map((item, index) => `
-            <div class="schedule-item" onclick="app.openEditModal('schedule', ${index})">
+        
+        container.innerHTML = scheduleItems.map(item => `
+            <div class="schedule-item" data-id="${item.id}" data-type="schedule">
                 <div class="schedule-item-header">
-                    <span class="schedule-time">${item.Time || 'No time'}</span>
-                    <span class="schedule-service">${item.Service || 'No service'}</span>
+                    <div class="schedule-time">${item.time}</div>
+                    <div class="schedule-service">${item.service}</div>
                 </div>
-                <div class="schedule-business">${item['Business Name'] || 'No business name'}</div>
-                <div class="schedule-address">
-                    <i class="fas fa-map-marker-alt"></i> ${item.Address || 'No address'}
+                <div class="schedule-business">${item.business}</div>
+                <div class="schedule-address">${item.address}</div>
+                <div class="schedule-contact">
+                    <i class="fas fa-user"></i> ${item.contactName} - ${item.customerContact}
                 </div>
-                ${item['Contact Name'] ? `
-                    <div class="schedule-contact">
-                        <i class="fas fa-user"></i> ${item['Contact Name']}
-                    </div>
-                ` : ''}
-                ${item['Customer Contact'] && item['Customer Contact'] !== 'Not provided' ? `
-                    <div class="schedule-contact">
-                        <i class="fas fa-phone"></i> ${item['Customer Contact']}
-                    </div>
-                ` : ''}
-                ${item.Details ? `
-                    <div class="schedule-details">${item.Details}</div>
-                ` : ''}
-                ${item.Notes ? `
-                    <div class="schedule-notes">
-                        <i class="fas fa-sticky-note"></i> ${item.Notes}
-                    </div>
-                ` : ''}
-                ${item['Parking Location'] ? `
-                    <div class="schedule-contact">
-                        <i class="fas fa-parking"></i> ${item['Parking Location']}
-                    </div>
-                ` : ''}
+                ${item.details ? `<div class="schedule-details">${item.details}</div>` : ''}
+                ${item.parking ? `<div class="schedule-parking"><i class="fas fa-car"></i> ${item.parking}</div>` : ''}
+                ${item.notes ? `<div class="schedule-notes"><i class="fas fa-sticky-note"></i> ${item.notes}</div>` : ''}
             </div>
         `).join('');
+        
+        // Add click events to schedule items
+        container.querySelectorAll('.schedule-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                const itemId = e.currentTarget.dataset.id;
+                this.editItem('schedule', itemId);
+            });
+        });
     }
 
     renderContacts() {
         const container = document.getElementById('contactsContainer');
-        const contacts = this.data['Customer Contact List'] || [];
+        let contacts = this.data.contacts || [];
+        
+        // Apply search filter
+        if (this.searchTerm) {
+            contacts = contacts.filter(contact => 
+                contact.business.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                contact.contactName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                contact.address.toLowerCase().includes(this.searchTerm.toLowerCase())
+            );
+        }
         
         if (contacts.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
                     <i class="fas fa-address-book"></i>
                     <h3>No contacts found</h3>
-                    <p>Add your first contact to get started</p>
+                    <p>No contacts match your search. Add some contacts to get started!</p>
                 </div>
             `;
             return;
         }
-
-        container.innerHTML = contacts.map((contact, index) => `
-            <div class="contact-item" onclick="app.openEditModal('contact', ${index})">
-                <div class="contact-business">${contact['Business Name'] || 'No business name'}</div>
-                <div class="contact-info">
-                    <div class="contact-info-item">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>${contact.Address || 'No address'}</span>
-                    </div>
-                    ${contact['Contact Name'] ? `
-                        <div class="contact-info-item">
-                            <i class="fas fa-user"></i>
-                            <span>${contact['Contact Name']}</span>
-                        </div>
-                    ` : ''}
-                    ${contact['Customer Contact'] && contact['Customer Contact'] !== 'Not provided' ? `
-                        <div class="contact-info-item">
-                            <i class="fas fa-phone"></i>
-                            <span>${contact['Customer Contact']}</span>
-                        </div>
-                    ` : ''}
-                    ${contact.Notes ? `
-                        <div class="contact-info-item">
-                            <i class="fas fa-sticky-note"></i>
-                            <span>${contact.Notes}</span>
-                        </div>
-                    ` : ''}
+        
+        container.innerHTML = contacts.map(contact => `
+            <div class="contact-item" data-id="${contact.id}" data-type="contact">
+                <div class="contact-name">${contact.contactName}</div>
+                <div class="contact-business">${contact.business}</div>
+                <div class="contact-phone">
+                    <i class="fas fa-phone"></i> ${contact.phone}
                 </div>
+                <div class="contact-address">
+                    <i class="fas fa-map-marker-alt"></i> ${contact.address}
+                </div>
+                ${contact.notes ? `<div class="contact-notes">${contact.notes}</div>` : ''}
             </div>
         `).join('');
+        
+        // Add click events to contact items
+        container.querySelectorAll('.contact-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                const itemId = e.currentTarget.dataset.id;
+                this.editItem('contact', itemId);
+            });
+        });
     }
 
     renderAdhoc() {
         const container = document.getElementById('adhocContainer');
-        const adhocItems = this.data['Adhoc'] || [];
+        let adhocItems = this.data.adhoc || [];
+        
+        // Apply search filter
+        if (this.searchTerm) {
+            adhocItems = adhocItems.filter(item => 
+                item.title.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                item.business.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                item.service.toLowerCase().includes(this.searchTerm.toLowerCase())
+            );
+        }
         
         if (adhocItems.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
                     <i class="fas fa-clock"></i>
-                    <h3>No ad-hoc services found</h3>
-                    <p>Add your first ad-hoc service</p>
+                    <h3>No ad-hoc services</h3>
+                    <p>No ad-hoc services found. Add some services to get started!</p>
                 </div>
             `;
             return;
         }
-
-        container.innerHTML = adhocItems.map((item, index) => `
-            <div class="contact-item" onclick="app.openEditModal('adhoc', ${index})">
-                <div class="contact-business">${item['Business Name'] || 'No business name'}</div>
-                <div class="contact-info">
-                    <div class="contact-info-item">
-                        <i class="fas fa-briefcase"></i>
-                        <span>${item.Service || 'No service'}</span>
-                    </div>
-                    ${item.Days ? `
-                        <div class="contact-info-item">
-                            <i class="fas fa-calendar"></i>
-                            <span>${item.Days}</span>
-                        </div>
-                    ` : ''}
-                    <div class="contact-info-item">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>${item.Address || 'No address'}</span>
-                    </div>
-                    ${item['Contact Name'] && item['Contact Name'] !== 'Not provided' ? `
-                        <div class="contact-info-item">
-                            <i class="fas fa-user"></i>
-                            <span>${item['Contact Name']}</span>
-                        </div>
-                    ` : ''}
-                    ${item['Customer Contact'] && item['Customer Contact'] !== 'Not provided' ? `
-                        <div class="contact-info-item">
-                            <i class="fas fa-phone"></i>
-                            <span>${item['Customer Contact']}</span>
-                        </div>
-                    ` : ''}
-                    ${item['Parking Location'] ? `
-                        <div class="contact-info-item">
-                            <i class="fas fa-parking"></i>
-                            <span>${item['Parking Location']}</span>
-                        </div>
-                    ` : ''}
+        
+        container.innerHTML = adhocItems.map(item => `
+            <div class="adhoc-item" data-id="${item.id}" data-type="adhoc">
+                <div class="adhoc-title">${item.title}</div>
+                <div class="adhoc-service">${item.service}</div>
+                <div class="adhoc-business">${item.business}</div>
+                <div class="adhoc-frequency">
+                    <i class="fas fa-calendar"></i> ${item.frequency}
                 </div>
+                <div class="adhoc-contact">
+                    <i class="fas fa-user"></i> ${item.contactName} - ${item.customerContact}
+                </div>
+                <div class="adhoc-address">
+                    <i class="fas fa-map-marker-alt"></i> ${item.address}
+                </div>
+                ${item.details ? `<div class="adhoc-details">${item.details}</div>` : ''}
+                ${item.notes ? `<div class="adhoc-notes">${item.notes}</div>` : ''}
             </div>
         `).join('');
+        
+        // Add click events to adhoc items
+        container.querySelectorAll('.adhoc-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                const itemId = e.currentTarget.dataset.id;
+                this.editItem('adhoc', itemId);
+            });
+        });
     }
 
-    openEditModal(type, index) {
-        this.editingType = type;
-        this.editingIndex = index;
+    filterScheduleItems(items) {
+        let filtered = items;
         
+        // Apply search filter
+        if (this.searchTerm) {
+            filtered = filtered.filter(item => 
+                item.business.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                item.address.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                item.contactName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                item.service.toLowerCase().includes(this.searchTerm.toLowerCase())
+            );
+        }
+        
+        // Apply day filter
+        if (this.dayFilter) {
+            filtered = filtered.filter(item => {
+                const itemDay = this.getDayFromScheduleItem(item);
+                return itemDay === this.dayFilter;
+            });
+        }
+        
+        // Apply service filter
+        if (this.serviceFilter) {
+            filtered = filtered.filter(item => item.service === this.serviceFilter);
+        }
+        
+        return filtered;
+    }
+
+    getDayFromScheduleItem(item) {
+        // Find which day this item belongs to
+        for (const [day, items] of Object.entries(this.data.schedule)) {
+            if (items.find(scheduleItem => scheduleItem.id === item.id)) {
+                return day;
+            }
+        }
+        return this.currentDay;
+    }
+
+    showAddModal() {
+        this.editingItem = null;
+        this.showModal('Add Schedule Entry', this.createScheduleForm());
+    }
+
+    showAddContactModal() {
+        this.editingItem = null;
+        this.showModal('Add Contact', this.createContactForm());
+    }
+
+    showAddAdhocModal() {
+        this.editingItem = null;
+        this.showModal('Add Ad-hoc Service', this.createAdhocForm());
+    }
+
+    editItem(type, id) {
         let item;
-        let title = 'Edit Entry';
-        
-        if (type === 'schedule') {
-            item = this.data[this.currentDay][index];
-            title = 'Edit Schedule Entry';
-        } else if (type === 'contact') {
-            item = this.data['Customer Contact List'][index];
-            title = 'Edit Contact';
-        } else if (type === 'adhoc') {
-            item = this.data['Adhoc'][index];
-            title = 'Edit Ad-hoc Service';
+        switch (type) {
+            case 'schedule':
+                item = this.findScheduleItem(id);
+                if (item) {
+                    this.editingItem = { type: 'schedule', data: item };
+                    this.showModal('Edit Schedule Entry', this.createScheduleForm(item));
+                }
+                break;
+            case 'contact':
+                item = this.data.contacts.find(c => c.id === id);
+                if (item) {
+                    this.editingItem = { type: 'contact', data: item };
+                    this.showModal('Edit Contact', this.createContactForm(item));
+                }
+                break;
+            case 'adhoc':
+                item = this.data.adhoc.find(a => a.id === id);
+                if (item) {
+                    this.editingItem = { type: 'adhoc', data: item };
+                    this.showModal('Edit Ad-hoc Service', this.createAdhocForm(item));
+                }
+                break;
         }
-
-        this.editingItem = { ...item };
-        this.showModal(title, this.createEditForm(type, item));
     }
 
-    openAddModal(type) {
-        this.editingType = type;
-        this.editingIndex = null;
-        this.editingItem = {};
-        
-        let title = 'Add New Entry';
-        
-        if (type === 'schedule') {
-            title = 'Add Schedule Entry';
-        } else if (type === 'contact') {
-            title = 'Add Contact';
-        } else if (type === 'adhoc') {
-            title = 'Add Ad-hoc Service';
+    findScheduleItem(id) {
+        for (const dayItems of Object.values(this.data.schedule)) {
+            const item = dayItems.find(item => item.id === id);
+            if (item) return item;
         }
-
-        this.showModal(title, this.createEditForm(type, {}));
-    }
-
-    createEditForm(type, item) {
-        let formFields = '';
-        
-        if (type === 'schedule') {
-            formFields = `
-                <div class="form-group">
-                    <label class="form-label">Time</label>
-                    <input type="text" class="form-input" id="time" value="${item.Time || ''}" placeholder="e.g., 7:40am">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Business Name</label>
-                    <input type="text" class="form-input" id="businessName" value="${item['Business Name'] || ''}" placeholder="Enter business name">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Service</label>
-                    <select class="form-input" id="service">
-                        <option value="">Select service type</option>
-                        <option value="Aus Post - Pickup" ${item.Service === 'Aus Post - Pickup' ? 'selected' : ''}>Aus Post - Pickup</option>
-                        <option value="Aus Post - Delivery" ${item.Service === 'Aus Post - Delivery' ? 'selected' : ''}>Aus Post - Delivery</option>
-                        <option value="Aus Post - Drop Off" ${item.Service === 'Aus Post - Drop Off' ? 'selected' : ''}>Aus Post - Drop Off</option>
-                        <option value="Secure Cash" ${item.Service === 'Secure Cash' ? 'selected' : ''}>Secure Cash</option>
-                        <option value="Mail Plus Collection" ${item.Service === 'Mail Plus Collection' ? 'selected' : ''}>Mail Plus Collection</option>
-                        <option value="Mail Plus Drop Off" ${item.Service === 'Mail Plus Drop Off' ? 'selected' : ''}>Mail Plus Drop Off</option>
-                        <option value="Banking" ${item.Service === 'Banking' ? 'selected' : ''}>Banking</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Address</label>
-                    <input type="text" class="form-input" id="address" value="${item.Address || ''}" placeholder="Enter address">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Contact Name</label>
-                    <input type="text" class="form-input" id="contactName" value="${item['Contact Name'] || ''}" placeholder="Enter contact name">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Customer Contact</label>
-                    <input type="text" class="form-input" id="customerContact" value="${item['Customer Contact'] || ''}" placeholder="Enter phone number">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Parking Location</label>
-                    <input type="text" class="form-input" id="parkingLocation" value="${item['Parking Location'] || ''}" placeholder="Enter parking information">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Details</label>
-                    <textarea class="form-textarea" id="details" placeholder="Enter detailed instructions">${item.Details || ''}</textarea>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Notes</label>
-                    <textarea class="form-textarea" id="notes" placeholder="Enter any additional notes">${item.Notes || ''}</textarea>
-                </div>
-            `;
-        } else if (type === 'contact') {
-            formFields = `
-                <div class="form-group">
-                    <label class="form-label">Business Name</label>
-                    <input type="text" class="form-input" id="businessName" value="${item['Business Name'] || ''}" placeholder="Enter business name">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Address</label>
-                    <input type="text" class="form-input" id="address" value="${item.Address || ''}" placeholder="Enter address">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Contact Name</label>
-                    <input type="text" class="form-input" id="contactName" value="${item['Contact Name'] || ''}" placeholder="Enter contact name">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Customer Contact</label>
-                    <input type="text" class="form-input" id="customerContact" value="${item['Customer Contact'] || ''}" placeholder="Enter phone number">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Notes</label>
-                    <textarea class="form-textarea" id="notes" placeholder="Enter any additional notes">${item.Notes || ''}</textarea>
-                </div>
-            `;
-        } else if (type === 'adhoc') {
-            formFields = `
-                <div class="form-group">
-                    <label class="form-label">Business Name</label>
-                    <input type="text" class="form-input" id="businessName" value="${item['Business Name'] || ''}" placeholder="Enter business name">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Service</label>
-                    <select class="form-input" id="service">
-                        <option value="">Select service type</option>
-                        <option value="Secure Cash" ${item.Service === 'Secure Cash' ? 'selected' : ''}>Secure Cash</option>
-                        <option value="Aus Post Pickup" ${item.Service === 'Aus Post Pickup' ? 'selected' : ''}>Aus Post Pickup</option>
-                        <option value="Mail Plus Collection" ${item.Service === 'Mail Plus Collection' ? 'selected' : ''}>Mail Plus Collection</option>
-                        <option value="Banking" ${item.Service === 'Banking' ? 'selected' : ''}>Banking</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Days</label>
-                    <input type="text" class="form-input" id="days" value="${item.Days || ''}" placeholder="e.g., Ad-Hoc (Fridays)">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Address</label>
-                    <input type="text" class="form-input" id="address" value="${item.Address || ''}" placeholder="Enter address">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Contact Name</label>
-                    <input type="text" class="form-input" id="contactName" value="${item['Contact Name'] || ''}" placeholder="Enter contact name">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Customer Contact</label>
-                    <input type="text" class="form-input" id="customerContact" value="${item['Customer Contact'] || ''}" placeholder="Enter phone number">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Parking Location</label>
-                    <input type="text" class="form-input" id="parkingLocation" value="${item['Parking Location'] || ''}" placeholder="Enter parking information">
-                </div>
-            `;
-        }
-        
-        return formFields;
+        return null;
     }
 
     showModal(title, content) {
@@ -676,174 +388,395 @@ class WorkScheduleManager {
         document.getElementById('modalBody').innerHTML = content;
         document.getElementById('editModal').classList.add('active');
         
-        // Show/hide delete button based on whether we're editing or adding
-        const deleteBtn = document.getElementById('deleteBtn');
-        deleteBtn.style.display = this.editingIndex !== null ? 'inline-flex' : 'none';
+        // Show/hide delete button based on whether we're editing
+        document.getElementById('deleteBtn').style.display = this.editingItem ? 'block' : 'none';
     }
 
     closeModal() {
         document.getElementById('editModal').classList.remove('active');
         this.editingItem = null;
-        this.editingType = null;
-        this.editingIndex = null;
+    }
+
+    createScheduleForm(item = null) {
+        const isEditing = !!item;
+        return `
+            <div class="form-group">
+                <label for="scheduleTime">Time</label>
+                <input type="time" id="scheduleTime" value="${item ? item.time : ''}" required>
+            </div>
+            <div class="form-group">
+                <label for="scheduleBusiness">Business Name</label>
+                <input type="text" id="scheduleBusiness" value="${item ? item.business : ''}" required>
+            </div>
+            <div class="form-group">
+                <label for="scheduleService">Service</label>
+                <select id="scheduleService" required>
+                    <option value="">Select Service</option>
+                    <option value="Aus Post" ${item && item.service === 'Aus Post' ? 'selected' : ''}>Australia Post</option>
+                    <option value="Secure Cash" ${item && item.service === 'Secure Cash' ? 'selected' : ''}>Secure Cash</option>
+                    <option value="Mail Plus" ${item && item.service === 'Mail Plus' ? 'selected' : ''}>Mail Plus</option>
+                    <option value="Banking" ${item && item.service === 'Banking' ? 'selected' : ''}>Banking</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="scheduleAddress">Address</label>
+                <input type="text" id="scheduleAddress" value="${item ? item.address : ''}" required>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="scheduleContactName">Contact Name</label>
+                    <input type="text" id="scheduleContactName" value="${item ? item.contactName : ''}" required>
+                </div>
+                <div class="form-group">
+                    <label for="scheduleCustomerContact">Customer Contact</label>
+                    <input type="text" id="scheduleCustomerContact" value="${item ? item.customerContact : ''}" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="scheduleParking">Parking Location</label>
+                <input type="text" id="scheduleParking" value="${item ? item.parking : ''}">
+            </div>
+            <div class="form-group">
+                <label for="scheduleDetails">Details</label>
+                <textarea id="scheduleDetails" rows="3">${item ? item.details : ''}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="scheduleNotes">Notes</label>
+                <textarea id="scheduleNotes" rows="2">${item ? item.notes : ''}</textarea>
+            </div>
+        `;
+    }
+
+    createContactForm(item = null) {
+        return `
+            <div class="form-group">
+                <label for="contactBusiness">Business Name</label>
+                <input type="text" id="contactBusiness" value="${item ? item.business : ''}" required>
+            </div>
+            <div class="form-group">
+                <label for="contactName">Contact Name</label>
+                <input type="text" id="contactName" value="${item ? item.contactName : ''}" required>
+            </div>
+            <div class="form-group">
+                <label for="contactAddress">Address</label>
+                <input type="text" id="contactAddress" value="${item ? item.address : ''}" required>
+            </div>
+            <div class="form-group">
+                <label for="contactPhone">Phone</label>
+                <input type="text" id="contactPhone" value="${item ? item.phone : ''}" required>
+            </div>
+            <div class="form-group">
+                <label for="contactNotes">Notes</label>
+                <textarea id="contactNotes" rows="3">${item ? item.notes : ''}</textarea>
+            </div>
+        `;
+    }
+
+    createAdhocForm(item = null) {
+        return `
+            <div class="form-group">
+                <label for="adhocTitle">Title</label>
+                <input type="text" id="adhocTitle" value="${item ? item.title : ''}" required>
+            </div>
+            <div class="form-group">
+                <label for="adhocService">Service</label>
+                <select id="adhocService" required>
+                    <option value="">Select Service</option>
+                    <option value="Aus Post" ${item && item.service === 'Aus Post' ? 'selected' : ''}>Australia Post</option>
+                    <option value="Secure Cash" ${item && item.service === 'Secure Cash' ? 'selected' : ''}>Secure Cash</option>
+                    <option value="Mail Plus" ${item && item.service === 'Mail Plus' ? 'selected' : ''}>Mail Plus</option>
+                    <option value="Banking" ${item && item.service === 'Banking' ? 'selected' : ''}>Banking</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="adhocBusiness">Business</label>
+                <input type="text" id="adhocBusiness" value="${item ? item.business : ''}" required>
+            </div>
+            <div class="form-group">
+                <label for="adhocAddress">Address</label>
+                <input type="text" id="adhocAddress" value="${item ? item.address : ''}" required>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="adhocContactName">Contact Name</label>
+                    <input type="text" id="adhocContactName" value="${item ? item.contactName : ''}" required>
+                </div>
+                <div class="form-group">
+                    <label for="adhocCustomerContact">Customer Contact</label>
+                    <input type="text" id="adhocCustomerContact" value="${item ? item.customerContact : ''}" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="adhocFrequency">Frequency</label>
+                <input type="text" id="adhocFrequency" value="${item ? item.frequency : ''}" required>
+            </div>
+            <div class="form-group">
+                <label for="adhocDetails">Details</label>
+                <textarea id="adhocDetails" rows="3">${item ? item.details : ''}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="adhocNotes">Notes</label>
+                <textarea id="adhocNotes" rows="2">${item ? item.notes : ''}</textarea>
+            </div>
+        `;
     }
 
     saveItem() {
-        const updatedItem = this.getFormData();
-        
-        if (this.editingIndex !== null) {
-            // Update existing item
-            if (this.editingType === 'schedule') {
-                this.data[this.currentDay][this.editingIndex] = updatedItem;
-            } else if (this.editingType === 'contact') {
-                this.data['Customer Contact List'][this.editingIndex] = updatedItem;
-            } else if (this.editingType === 'adhoc') {
-                this.data['Adhoc'][this.editingIndex] = updatedItem;
-            }
+        if (!this.editingItem) {
+            // Adding new item
+            this.addNewItem();
         } else {
-            // Add new item
-            if (this.editingType === 'schedule') {
-                this.data[this.currentDay].push(updatedItem);
-            } else if (this.editingType === 'contact') {
-                this.data['Customer Contact List'].push(updatedItem);
-            } else if (this.editingType === 'adhoc') {
-                this.data['Adhoc'].push(updatedItem);
-            }
+            // Updating existing item
+            this.updateExistingItem();
         }
-        
-        this.saveToStorage();
-        this.closeModal();
-        this.renderCurrentView();
     }
 
-    deleteItem() {
-        if (this.editingIndex !== null && confirm('Are you sure you want to delete this item?')) {
-            if (this.editingType === 'schedule') {
-                this.data[this.currentDay].splice(this.editingIndex, 1);
-            } else if (this.editingType === 'contact') {
-                this.data['Customer Contact List'].splice(this.editingIndex, 1);
-            } else if (this.editingType === 'adhoc') {
-                this.data['Adhoc'].splice(this.editingIndex, 1);
-            }
-            
-            this.saveToStorage();
-            this.closeModal();
-            this.renderCurrentView();
+    addNewItem() {
+        const formData = this.getFormData();
+        if (!formData) return;
+
+        const newItem = {
+            id: this.generateId(),
+            ...formData
+        };
+
+        switch (this.currentTab) {
+            case 'schedule':
+                if (!this.data.schedule[this.currentDay]) {
+                    this.data.schedule[this.currentDay] = [];
+                }
+                this.data.schedule[this.currentDay].push(newItem);
+                break;
+            case 'contacts':
+                this.data.contacts.push(newItem);
+                break;
+            case 'adhoc':
+                this.data.adhoc.push(newItem);
+                break;
         }
+
+        this.saveData();
+        this.closeModal();
+        this.renderCurrentView();
+        this.showMessage('Item added successfully!', 'success');
+    }
+
+    updateExistingItem() {
+        const formData = this.getFormData();
+        if (!formData) return;
+
+        const updatedItem = {
+            ...this.editingItem.data,
+            ...formData
+        };
+
+        switch (this.editingItem.type) {
+            case 'schedule':
+                // Find and update the item in the correct day
+                for (const [day, items] of Object.entries(this.data.schedule)) {
+                    const index = items.findIndex(item => item.id === this.editingItem.data.id);
+                    if (index !== -1) {
+                        this.data.schedule[day][index] = updatedItem;
+                        break;
+                    }
+                }
+                break;
+            case 'contact':
+                const contactIndex = this.data.contacts.findIndex(c => c.id === this.editingItem.data.id);
+                if (contactIndex !== -1) {
+                    this.data.contacts[contactIndex] = updatedItem;
+                }
+                break;
+            case 'adhoc':
+                const adhocIndex = this.data.adhoc.findIndex(a => a.id === this.editingItem.data.id);
+                if (adhocIndex !== -1) {
+                    this.data.adhoc[adhocIndex] = updatedItem;
+                }
+                break;
+        }
+
+        this.saveData();
+        this.closeModal();
+        this.renderCurrentView();
+        this.showMessage('Item updated successfully!', 'success');
     }
 
     getFormData() {
         const formData = {};
         
-        if (this.editingType === 'schedule') {
-            formData.Time = document.getElementById('time').value;
-            formData['Business Name'] = document.getElementById('businessName').value;
-            formData.Service = document.getElementById('service').value;
-            formData.Address = document.getElementById('address').value;
-            formData['Contact Name'] = document.getElementById('contactName').value;
-            formData['Customer Contact'] = document.getElementById('customerContact').value;
-            formData['Parking Location'] = document.getElementById('parkingLocation').value;
-            formData.Details = document.getElementById('details').value;
-            formData.Notes = document.getElementById('notes').value;
-        } else if (this.editingType === 'contact') {
-            formData['Business Name'] = document.getElementById('businessName').value;
-            formData.Address = document.getElementById('address').value;
-            formData['Contact Name'] = document.getElementById('contactName').value;
-            formData['Customer Contact'] = document.getElementById('customerContact').value;
-            formData.Notes = document.getElementById('notes').value;
-        } else if (this.editingType === 'adhoc') {
-            formData['Business Name'] = document.getElementById('businessName').value;
-            formData.Service = document.getElementById('service').value;
-            formData.Days = document.getElementById('days').value;
-            formData.Address = document.getElementById('address').value;
-            formData['Contact Name'] = document.getElementById('contactName').value;
-            formData['Customer Contact'] = document.getElementById('customerContact').value;
-            formData['Parking Location'] = document.getElementById('parkingLocation').value;
+        switch (this.currentTab) {
+            case 'schedule':
+                formData.time = document.getElementById('scheduleTime').value;
+                formData.business = document.getElementById('scheduleBusiness').value;
+                formData.service = document.getElementById('scheduleService').value;
+                formData.address = document.getElementById('scheduleAddress').value;
+                formData.contactName = document.getElementById('scheduleContactName').value;
+                formData.customerContact = document.getElementById('scheduleCustomerContact').value;
+                formData.parking = document.getElementById('scheduleParking').value;
+                formData.details = document.getElementById('scheduleDetails').value;
+                formData.notes = document.getElementById('scheduleNotes').value;
+                break;
+            case 'contacts':
+                formData.business = document.getElementById('contactBusiness').value;
+                formData.contactName = document.getElementById('contactName').value;
+                formData.address = document.getElementById('contactAddress').value;
+                formData.phone = document.getElementById('contactPhone').value;
+                formData.notes = document.getElementById('contactNotes').value;
+                break;
+            case 'adhoc':
+                formData.title = document.getElementById('adhocTitle').value;
+                formData.service = document.getElementById('adhocService').value;
+                formData.business = document.getElementById('adhocBusiness').value;
+                formData.address = document.getElementById('adhocAddress').value;
+                formData.contactName = document.getElementById('adhocContactName').value;
+                formData.customerContact = document.getElementById('adhocCustomerContact').value;
+                formData.frequency = document.getElementById('adhocFrequency').value;
+                formData.details = document.getElementById('adhocDetails').value;
+                formData.notes = document.getElementById('adhocNotes').value;
+                break;
         }
+
+        // Validate required fields
+        const requiredFields = Object.keys(formData).filter(key => 
+            !['parking', 'details', 'notes'].includes(key)
+        );
         
+        for (const field of requiredFields) {
+            if (!formData[field]) {
+                this.showMessage(`Please fill in all required fields.`, 'error');
+                return null;
+            }
+        }
+
         return formData;
     }
 
-    handleSearch(query) {
-        // Implementation for search functionality
-        // This would filter the current view based on the search query
-        console.log('Search query:', query);
-        // For now, we'll just log it - full implementation would filter results
-    }
+    deleteItem() {
+        if (!this.editingItem) return;
 
-    handleDayFilter(day) {
-        if (day && this.currentTab === 'schedule') {
-            this.switchDay(day);
+        if (confirm('Are you sure you want to delete this item?')) {
+            switch (this.editingItem.type) {
+                case 'schedule':
+                    // Find and remove the item from the correct day
+                    for (const [day, items] of Object.entries(this.data.schedule)) {
+                        const index = items.findIndex(item => item.id === this.editingItem.data.id);
+                        if (index !== -1) {
+                            this.data.schedule[day].splice(index, 1);
+                            break;
+                        }
+                    }
+                    break;
+                case 'contact':
+                    const contactIndex = this.data.contacts.findIndex(c => c.id === this.editingItem.data.id);
+                    if (contactIndex !== -1) {
+                        this.data.contacts.splice(contactIndex, 1);
+                    }
+                    break;
+                case 'adhoc':
+                    const adhocIndex = this.data.adhoc.findIndex(a => a.id === this.editingItem.data.id);
+                    if (adhocIndex !== -1) {
+                        this.data.adhoc.splice(adhocIndex, 1);
+                    }
+                    break;
+            }
+
+            this.saveData();
+            this.closeModal();
+            this.renderCurrentView();
+            this.showMessage('Item deleted successfully!', 'success');
         }
     }
 
-    handleServiceFilter(service) {
-        // Implementation for service filtering
-        console.log('Service filter:', service);
-        // For now, we'll just log it - full implementation would filter results
+    generateId() {
+        return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    }
+
+    saveData() {
+        MailDeliveryData.saveData(this.data);
+    }
+
+    loadData() {
+        this.data = MailDeliveryData.getCurrentData();
+        this.renderCurrentView();
     }
 
     exportData() {
         const dataStr = JSON.stringify(this.data, null, 2);
-        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
         
-        const exportFileDefaultName = 'work-schedule-export.json';
-        const linkElement = document.createElement('a');
-        linkElement.setAttribute('href', dataUri);
-        linkElement.setAttribute('download', exportFileDefaultName);
-        linkElement.click();
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'mail-delivery-data.json';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        this.showMessage('Data exported successfully!', 'success');
     }
 
-    importData(file) {
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const importedData = JSON.parse(e.target.result);
-                    this.data = importedData;
-                    this.saveToStorage();
-                    this.renderCurrentView();
-                    alert('Data imported successfully!');
-                } catch (error) {
-                    alert('Error importing data. Please check the file format.');
-                }
-            };
-            reader.readAsText(file);
-        }
+    importData() {
+        document.getElementById('fileInput').click();
     }
 
-    saveToStorage() {
-        localStorage.setItem('workScheduleData', JSON.stringify(this.data));
-    }
+    handleFileImport(event) {
+        const file = event.target.files[0];
+        if (!file) return;
 
-    loadFromStorage() {
-        const stored = localStorage.getItem('workScheduleData');
-        if (stored) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
             try {
-                this.data = JSON.parse(stored);
+                const importedData = JSON.parse(e.target.result);
+                this.data = importedData;
+                this.saveData();
+                this.renderCurrentView();
+                this.showMessage('Data imported successfully!', 'success');
             } catch (error) {
-                console.error('Error loading from storage:', error);
+                this.showMessage('Error importing data. Please check the file format.', 'error');
             }
-        } else {
-            // If no data in storage, load the complete schedule data
-            if (window.COMPLETE_SCHEDULE_DATA) {
-                this.data = window.COMPLETE_SCHEDULE_DATA;
-                this.saveToStorage();
-            }
+        };
+        reader.readAsText(file);
+        
+        // Reset file input
+        event.target.value = '';
+    }
+
+    resetData() {
+        if (confirm('Are you sure you want to reset all data to default? This cannot be undone.')) {
+            this.data = MailDeliveryData.resetToDefault();
+            this.renderCurrentView();
+            this.showMessage('Data reset to default successfully!', 'success');
         }
     }
 
-    resetToDefaultData() {
-        if (confirm('Are you sure you want to reset to the default schedule data? This will overwrite all your current data.')) {
-            this.loadDefaultData();
-            this.saveToStorage();
-            this.renderCurrentView();
-            alert('Data has been reset to default schedule.');
-        }
+    showMessage(message, type = 'info') {
+        // Remove existing messages
+        const existingMessages = document.querySelectorAll('.message');
+        existingMessages.forEach(msg => msg.remove());
+
+        // Create new message
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${type}`;
+        messageDiv.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+            <span>${message}</span>
+        `;
+
+        // Insert at the top of main content
+        const mainContent = document.querySelector('.main-content');
+        mainContent.insertBefore(messageDiv, mainContent.firstChild);
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (messageDiv.parentNode) {
+                messageDiv.remove();
+            }
+        }, 5000);
     }
 }
 
-// Initialize the app when the DOM is loaded
+// Initialize the application when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    window.app = new WorkScheduleManager();
+    window.app = new MailDeliveryManager();
 });

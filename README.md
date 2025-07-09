@@ -1,6 +1,6 @@
-# Work Schedule Manager
+# Mail Delivery Manager
 
-A modern, responsive web application for managing work schedules, customer contacts, and ad-hoc services. Built with HTML5, CSS3, and JavaScript, this app provides an intuitive interface for viewing, editing, and managing your daily work schedule on desktop and mobile devices.
+A modern, responsive web application for managing mail delivery schedules, customer contacts, and ad-hoc services. Built with HTML5, CSS3, and JavaScript, this app provides an intuitive interface for viewing, editing, and managing your daily delivery schedule on desktop and mobile devices.
 
 ## Features
 
@@ -112,7 +112,7 @@ Quick deployment steps:
 
 ### File Structure
 ```
-work-schedule-manager/
+mail-delivery-manager/
 ├── index.html          # Main application file
 ├── styles.css          # Styling and responsive design
 ├── script.js           # Main application logic
@@ -217,4 +217,4 @@ This project is open source and available under the MIT License.
 **Version**: 1.0.0  
 **Last Updated**: 2024
 
-Enjoy managing your work schedule efficiently! 🚀
+Enjoy managing your mail delivery schedule efficiently! 🚀
