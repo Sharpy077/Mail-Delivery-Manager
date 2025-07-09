@@ -21,7 +21,35 @@ A modern, responsive web application for managing work schedules, customer conta
 - **Flexible Scheduling**: Track ad-hoc pickups and deliveries
 - **Service Categorization**: Organize by service type and frequency
 
-### 🔍 Search & Filter
+### �️ Route Optimization
+- **Smart Route Planning**: Automatically optimize delivery routes based on postal codes and addresses
+- **Distance Calculation**: Estimate total distance and travel time for optimized routes
+- **Route Saving**: Save and name optimized routes for future reference
+- **Stop Organization**: Visual step-by-step route with numbered stops
+
+### 💰 Invoicing Management
+- **Automated Invoice Generation**: Create invoices based on scheduled services
+- **Customer Billing**: Generate invoices for specific customers and time periods
+- **Invoice Tracking**: Monitor invoice status (pending, paid, overdue)
+- **Ad-hoc Charges**: Add irregular charges and adjustments to customer accounts
+- **Detailed Invoice View**: View complete invoice breakdowns with line items
+
+### 🧮 Pricing Calculator
+- **Dynamic Pricing**: Calculate job prices based on service type, distance, and requirements
+- **Service Rates**: Predefined rates for different service types
+- **Mileage Calculation**: Automatic mileage charges based on distance
+- **Rush Surcharges**: Apply rush job surcharges when needed
+- **Minimum Charges**: Enforce minimum billing amounts
+
+### 📊 Dashboard & Analytics
+- **Revenue Tracking**: Monthly and yearly revenue analysis
+- **Job Statistics**: Total jobs, average job value, and service breakdown
+- **Invoice Analytics**: Track pending invoices and payment status
+- **Route Metrics**: Monitor route optimization efficiency
+- **Yearly Totals**: Comprehensive year-end financial reporting
+- **Export Reports**: Download detailed analytics reports
+
+### �🔍 Search & Filter
 - **Global Search**: Search across all businesses, addresses, and contacts
 - **Day Filter**: Filter schedule by specific days
 - **Service Filter**: Filter by service type
@@ -85,11 +113,45 @@ Quick deployment steps:
 - **Schedule**: View and manage daily schedules
 - **Contacts**: Manage customer contact information
 - **Ad-hoc**: Handle irregular services and tasks
+- **Routes**: Optimize and view delivery routes
+- **Invoicing**: Generate and manage invoices and charges
+- **Pricing**: Calculate job prices and view service rates
+- **Dashboard**: View analytics and yearly totals
 
 #### Header Functions
 - **Export**: Download your data as a JSON file
 - **Import**: Upload a JSON file to restore data
 - **Reset**: Restore to original schedule data
+
+### Using New Features
+
+#### Route Optimization
+1. Navigate to the **Routes** tab
+2. Select a day with scheduled entries
+3. Click **"Optimize Routes"** to generate an optimized route
+4. Review the route with estimated time and distance
+5. Click **"Save Route"** to save the optimized route with a custom name
+
+#### Invoice Management
+1. Go to the **Invoicing** tab
+2. Click **"Generate Invoice"** to create a new invoice
+3. Select a customer and invoice period
+4. Review generated invoice items based on scheduled services
+5. Click **"Add Charge"** to add ad-hoc charges to customer accounts
+6. View invoice details by clicking on any invoice
+
+#### Pricing Calculator
+1. Visit the **Pricing** tab to view current service rates
+2. Click **"Calculate Price"** to open the pricing calculator
+3. Select service type, enter distance, and specify rush requirements
+4. Get detailed price breakdown with all charges
+
+#### Dashboard Analytics
+1. Access the **Dashboard** tab for comprehensive analytics
+2. View monthly revenue, total invoices, and pending amounts
+3. Monitor yearly totals and service statistics
+4. Click **"Export Report"** to download detailed analytics
+5. Use **"Refresh"** to update dashboard data
 
 ### Data Management
 

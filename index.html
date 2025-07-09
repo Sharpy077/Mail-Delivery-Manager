@@ -39,6 +39,18 @@
             <button class="nav-tab" data-tab="adhoc">
                 <i class="fas fa-clock"></i> Ad-hoc
             </button>
+            <button class="nav-tab" data-tab="routes">
+                <i class="fas fa-route"></i> Routes
+            </button>
+            <button class="nav-tab" data-tab="invoicing">
+                <i class="fas fa-file-invoice-dollar"></i> Invoicing
+            </button>
+            <button class="nav-tab" data-tab="pricing">
+                <i class="fas fa-calculator"></i> Pricing
+            </button>
+            <button class="nav-tab" data-tab="dashboard">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </button>
         </nav>
 
         <!-- Search and Filter -->
@@ -105,6 +117,73 @@
                 </div>
                 <div class="adhoc-container" id="adhocContainer">
                     <!-- Ad-hoc items will be populated here -->
+                </div>
+            </div>
+
+            <!-- Routes Tab -->
+            <div class="tab-content" id="routes-tab">
+                <div class="routes-header">
+                    <h2>Route Optimization</h2>
+                    <div class="routes-actions">
+                        <button class="btn btn-primary" id="optimizeRoutesBtn">
+                            <i class="fas fa-route"></i> Optimize Routes
+                        </button>
+                        <button class="btn btn-secondary" id="saveRouteBtn">
+                            <i class="fas fa-save"></i> Save Route
+                        </button>
+                    </div>
+                </div>
+                <div class="routes-container" id="routesContainer">
+                    <!-- Route optimization results will be populated here -->
+                </div>
+            </div>
+
+            <!-- Invoicing Tab -->
+            <div class="tab-content" id="invoicing-tab">
+                <div class="invoicing-header">
+                    <h2>Invoice Management</h2>
+                    <div class="invoicing-actions">
+                        <button class="btn btn-primary" id="generateInvoiceBtn">
+                            <i class="fas fa-file-invoice"></i> Generate Invoice
+                        </button>
+                        <button class="btn btn-secondary" id="addChargeBtn">
+                            <i class="fas fa-plus"></i> Add Charge
+                        </button>
+                    </div>
+                </div>
+                <div class="invoicing-container" id="invoicingContainer">
+                    <!-- Invoices will be populated here -->
+                </div>
+            </div>
+
+            <!-- Pricing Tab -->
+            <div class="tab-content" id="pricing-tab">
+                <div class="pricing-header">
+                    <h2>Pricing Calculator</h2>
+                    <button class="btn btn-primary" id="calculatePriceBtn">
+                        <i class="fas fa-calculator"></i> Calculate Price
+                    </button>
+                </div>
+                <div class="pricing-container" id="pricingContainer">
+                    <!-- Pricing calculator will be populated here -->
+                </div>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div class="tab-content" id="dashboard-tab">
+                <div class="dashboard-header">
+                    <h2>Dashboard & Analytics</h2>
+                    <div class="dashboard-actions">
+                        <button class="btn btn-primary" id="refreshDashboardBtn">
+                            <i class="fas fa-sync"></i> Refresh
+                        </button>
+                        <button class="btn btn-secondary" id="exportReportBtn">
+                            <i class="fas fa-download"></i> Export Report
+                        </button>
+                    </div>
+                </div>
+                <div class="dashboard-container" id="dashboardContainer">
+                    <!-- Dashboard metrics will be populated here -->
                 </div>
             </div>
         </main>

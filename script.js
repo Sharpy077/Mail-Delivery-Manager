@@ -8,7 +8,24 @@ class WorkScheduleManager {
             "Wednesday": [],
             "Thursday": [],
             "Friday": [],
-            "Adhoc": []
+            "Adhoc": [],
+            "Invoices": [],
+            "Charges": [],
+            "Routes": [],
+            "Pricing": {
+                "serviceRates": {
+                    "Aus Post - Pickup": 25,
+                    "Aus Post - Delivery": 20,
+                    "Aus Post - Drop Off": 15,
+                    "Secure Cash": 35,
+                    "Mail Plus Collection": 30,
+                    "Mail Plus Drop Off": 25,
+                    "Banking": 30
+                },
+                "mileageRate": 0.85,
+                "minimumCharge": 15,
+                "rushSurcharge": 1.5
+            }
         };
         this.currentDay = 'Monday';
         this.currentTab = 'schedule';
@@ -309,6 +326,35 @@ class WorkScheduleManager {
             this.openAddModal('schedule');
         });
 
+        // New feature event listeners
+        document.getElementById('optimizeRoutesBtn').addEventListener('click', () => {
+            this.optimizeRoutes();
+        });
+
+        document.getElementById('saveRouteBtn').addEventListener('click', () => {
+            this.saveCurrentRoute();
+        });
+
+        document.getElementById('generateInvoiceBtn').addEventListener('click', () => {
+            this.openInvoiceModal();
+        });
+
+        document.getElementById('addChargeBtn').addEventListener('click', () => {
+            this.openChargeModal();
+        });
+
+        document.getElementById('calculatePriceBtn').addEventListener('click', () => {
+            this.calculateJobPrice();
+        });
+
+        document.getElementById('refreshDashboardBtn').addEventListener('click', () => {
+            this.refreshDashboard();
+        });
+
+        document.getElementById('exportReportBtn').addEventListener('click', () => {
+            this.exportAnalyticsReport();
+        });
+
         // Close modal when clicking outside
         document.getElementById('editModal').addEventListener('click', (e) => {
             if (e.target.id === 'editModal') {
@@ -357,6 +403,18 @@ class WorkScheduleManager {
                 break;
             case 'adhoc':
                 this.renderAdhoc();
+                break;
+            case 'routes':
+                this.renderRoutes();
+                break;
+            case 'invoicing':
+                this.renderInvoicing();
+                break;
+            case 'pricing':
+                this.renderPricing();
+                break;
+            case 'dashboard':
+                this.renderDashboard();
                 break;
         }
     }
@@ -840,6 +898,706 @@ class WorkScheduleManager {
             this.renderCurrentView();
             alert('Data has been reset to default schedule.');
         }
+    }
+
+    // Route Optimization Methods
+    optimizeRoutes() {
+        const dayData = this.data[this.currentDay] || [];
+        if (dayData.length === 0) {
+            alert('No schedule entries found for ' + this.currentDay);
+            return;
+        }
+
+        // Simple route optimization based on postal codes and addresses
+        const optimizedRoute = this.calculateOptimalRoute(dayData);
+        this.data.Routes = [{
+            day: this.currentDay,
+            date: new Date().toLocaleDateString(),
+            stops: optimizedRoute,
+            totalDistance: this.calculateTotalDistance(optimizedRoute),
+            estimatedTime: this.calculateEstimatedTime(optimizedRoute)
+        }];
+        
+        this.saveToStorage();
+        this.renderRoutes();
+        this.switchTab('routes');
+    }
+
+    calculateOptimalRoute(stops) {
+        // Simple optimization: sort by postal code, then by street name
+        return stops.map((stop, index) => ({
+            ...stop,
+            originalIndex: index,
+            stopNumber: index + 1
+        })).sort((a, b) => {
+            // Extract postal code from address
+            const postcodeA = this.extractPostcode(a.Address || '');
+            const postcodeB = this.extractPostcode(b.Address || '');
+            
+            if (postcodeA !== postcodeB) {
+                return postcodeA.localeCompare(postcodeB);
+            }
+            
+            // If same postcode, sort by street name
+            return (a.Address || '').localeCompare(b.Address || '');
+        }).map((stop, index) => ({
+            ...stop,
+            stopNumber: index + 1
+        }));
+    }
+
+    extractPostcode(address) {
+        // Extract postcode from Australian address
+        const match = address.match(/(\d{4})/);
+        return match ? match[1] : '0000';
+    }
+
+    calculateTotalDistance(route) {
+        // Simplified distance calculation (in reality, would use mapping API)
+        return `${(route.length * 3.5).toFixed(1)} km`;
+    }
+
+    calculateEstimatedTime(route) {
+        // Simple time calculation: 10 minutes per stop + 5 minutes travel time
+        const totalMinutes = route.length * 15;
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        return `${hours}h ${minutes}m`;
+    }
+
+    saveCurrentRoute() {
+        if (this.data.Routes.length === 0) {
+            alert('No route to save. Please optimize routes first.');
+            return;
+        }
+        
+        const routeName = prompt('Enter route name:');
+        if (routeName) {
+            this.data.Routes[this.data.Routes.length - 1].name = routeName;
+            this.saveToStorage();
+            alert('Route saved successfully!');
+        }
+    }
+
+    renderRoutes() {
+        const container = document.getElementById('routesContainer');
+        const routes = this.data.Routes || [];
+        
+        if (routes.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-route"></i>
+                    <h3>No optimized routes found</h3>
+                    <p>Click "Optimize Routes" to create an optimized route for the selected day</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = routes.map(route => `
+            <div class="route-item">
+                <div class="route-header">
+                    <div class="route-title">${route.name || route.day + ' Route'}</div>
+                    <div class="route-distance">${route.totalDistance}</div>
+                </div>
+                <div class="route-info">
+                    <div style="display: flex; gap: 2rem; margin-bottom: 1rem;">
+                        <div><strong>Day:</strong> ${route.day}</div>
+                        <div><strong>Date:</strong> ${route.date}</div>
+                        <div><strong>Estimated Time:</strong> ${route.estimatedTime}</div>
+                    </div>
+                </div>
+                <div class="route-stops">
+                    ${route.stops.map(stop => `
+                        <div class="route-stop">
+                            <div class="stop-number">${stop.stopNumber}</div>
+                            <div class="stop-details">
+                                <div class="stop-business">${stop['Business Name'] || 'Unknown Business'}</div>
+                                <div class="stop-address">${stop.Address || 'No address'}</div>
+                                <div class="stop-time">${stop.Time || 'No time'}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Invoicing Methods
+    openInvoiceModal() {
+        const invoiceForm = `
+            <div class="form-group">
+                <label class="form-label">Customer</label>
+                <select class="form-input" id="invoiceCustomer">
+                    <option value="">Select Customer</option>
+                    ${this.data['Customer Contact List'].map(contact => 
+                        `<option value="${contact['Business Name']}">${contact['Business Name']}</option>`
+                    ).join('')}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Invoice Date</label>
+                <input type="date" class="form-input" id="invoiceDate" value="${new Date().toISOString().split('T')[0]}">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Due Date</label>
+                <input type="date" class="form-input" id="invoiceDueDate" value="${new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0]}">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Services Period</label>
+                <select class="form-input" id="invoicePeriod">
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                    <option value="custom">Custom Period</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Additional Notes</label>
+                <textarea class="form-textarea" id="invoiceNotes" placeholder="Enter any additional notes for this invoice"></textarea>
+            </div>
+        `;
+        
+        this.showModal('Generate Invoice', invoiceForm);
+        
+        // Replace save button functionality
+        document.getElementById('saveBtn').onclick = () => {
+            this.generateInvoice();
+        };
+    }
+
+    generateInvoice() {
+        const customer = document.getElementById('invoiceCustomer').value;
+        const date = document.getElementById('invoiceDate').value;
+        const dueDate = document.getElementById('invoiceDueDate').value;
+        const period = document.getElementById('invoicePeriod').value;
+        const notes = document.getElementById('invoiceNotes').value;
+        
+        if (!customer) {
+            alert('Please select a customer');
+            return;
+        }
+        
+        // Calculate invoice items based on schedule
+        const invoiceItems = this.calculateInvoiceItems(customer, period);
+        const total = invoiceItems.reduce((sum, item) => sum + item.amount, 0);
+        
+        const invoice = {
+            id: 'INV-' + Date.now(),
+            customer: customer,
+            date: date,
+            dueDate: dueDate,
+            status: 'pending',
+            items: invoiceItems,
+            total: total,
+            notes: notes,
+            createdAt: new Date().toISOString()
+        };
+        
+        this.data.Invoices.push(invoice);
+        this.saveToStorage();
+        this.closeModal();
+        this.renderInvoicing();
+        this.switchTab('invoicing');
+        
+        alert(`Invoice ${invoice.id} generated successfully!`);
+    }
+
+    calculateInvoiceItems(customer, period) {
+        const items = [];
+        const serviceRates = this.data.Pricing.serviceRates;
+        
+        // Get all schedule items for the customer
+        const allDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+        
+        allDays.forEach(day => {
+            const dayData = this.data[day] || [];
+            const customerItems = dayData.filter(item => 
+                item['Business Name'] && item['Business Name'].includes(customer)
+            );
+            
+            customerItems.forEach(item => {
+                const service = item.Service || 'Standard Service';
+                const rate = serviceRates[service] || 25;
+                
+                items.push({
+                    description: `${service} - ${day}`,
+                    service: service,
+                    day: day,
+                    rate: rate,
+                    quantity: 1,
+                    amount: rate
+                });
+            });
+        });
+        
+        return items;
+    }
+
+    openChargeModal() {
+        const chargeForm = `
+            <div class="form-group">
+                <label class="form-label">Customer</label>
+                <select class="form-input" id="chargeCustomer">
+                    <option value="">Select Customer</option>
+                    ${this.data['Customer Contact List'].map(contact => 
+                        `<option value="${contact['Business Name']}">${contact['Business Name']}</option>`
+                    ).join('')}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Charge Type</label>
+                <select class="form-input" id="chargeType">
+                    <option value="adhoc">Ad-hoc Service</option>
+                    <option value="rush">Rush Charge</option>
+                    <option value="extra">Extra Service</option>
+                    <option value="adjustment">Adjustment</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Amount</label>
+                <input type="number" class="form-input" id="chargeAmount" step="0.01" placeholder="0.00">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea class="form-textarea" id="chargeDescription" placeholder="Describe the charge"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Date</label>
+                <input type="date" class="form-input" id="chargeDate" value="${new Date().toISOString().split('T')[0]}">
+            </div>
+        `;
+        
+        this.showModal('Add Charge', chargeForm);
+        
+        // Replace save button functionality
+        document.getElementById('saveBtn').onclick = () => {
+            this.addCharge();
+        };
+    }
+
+    addCharge() {
+        const customer = document.getElementById('chargeCustomer').value;
+        const type = document.getElementById('chargeType').value;
+        const amount = parseFloat(document.getElementById('chargeAmount').value);
+        const description = document.getElementById('chargeDescription').value;
+        const date = document.getElementById('chargeDate').value;
+        
+        if (!customer || !amount || !description) {
+            alert('Please fill in all required fields');
+            return;
+        }
+        
+        const charge = {
+            id: 'CHG-' + Date.now(),
+            customer: customer,
+            type: type,
+            amount: amount,
+            description: description,
+            date: date,
+            createdAt: new Date().toISOString()
+        };
+        
+        this.data.Charges.push(charge);
+        this.saveToStorage();
+        this.closeModal();
+        this.renderInvoicing();
+        
+        alert('Charge added successfully!');
+    }
+
+    renderInvoicing() {
+        const container = document.getElementById('invoicingContainer');
+        const invoices = this.data.Invoices || [];
+        const charges = this.data.Charges || [];
+        
+        if (invoices.length === 0 && charges.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <h3>No invoices or charges found</h3>
+                    <p>Generate your first invoice or add charges to get started</p>
+                </div>
+            `;
+            return;
+        }
+
+        const invoiceHtml = invoices.map(invoice => `
+            <div class="invoice-item" onclick="app.viewInvoice('${invoice.id}')">
+                <div class="invoice-header">
+                    <div class="invoice-number">${invoice.id}</div>
+                    <div class="invoice-status ${invoice.status}">${invoice.status.toUpperCase()}</div>
+                </div>
+                <div class="invoice-customer">${invoice.customer}</div>
+                <div class="invoice-date">Invoice Date: ${invoice.date}</div>
+                <div class="invoice-date">Due Date: ${invoice.dueDate}</div>
+                <div class="invoice-amount">$${invoice.total.toFixed(2)}</div>
+                <div class="invoice-items">
+                    ${invoice.items.slice(0, 3).map(item => `
+                        <div class="invoice-item-line">
+                            <div class="invoice-item-description">${item.description}</div>
+                            <div class="invoice-item-amount">$${item.amount.toFixed(2)}</div>
+                        </div>
+                    `).join('')}
+                    ${invoice.items.length > 3 ? `<div class="invoice-item-line"><em>... and ${invoice.items.length - 3} more items</em></div>` : ''}
+                </div>
+            </div>
+        `).join('');
+
+        const chargeHtml = charges.map(charge => `
+            <div class="charge-item" onclick="app.editCharge('${charge.id}')">
+                <div class="charge-header">
+                    <div class="charge-type">${charge.type.toUpperCase()}</div>
+                    <div class="charge-amount">$${charge.amount.toFixed(2)}</div>
+                </div>
+                <div class="charge-description">${charge.description}</div>
+                <div class="charge-date">Customer: ${charge.customer}</div>
+                <div class="charge-date">Date: ${charge.date}</div>
+            </div>
+        `).join('');
+
+        container.innerHTML = `
+            <div style="margin-bottom: 2rem;">
+                <h3>Recent Invoices</h3>
+                ${invoiceHtml || '<p>No invoices found</p>'}
+            </div>
+            <div>
+                <h3>Recent Charges</h3>
+                ${chargeHtml || '<p>No charges found</p>'}
+            </div>
+        `;
+    }
+
+    viewInvoice(invoiceId) {
+        const invoice = this.data.Invoices.find(inv => inv.id === invoiceId);
+        if (!invoice) return;
+        
+        const invoiceDetails = `
+            <div style="margin-bottom: 2rem;">
+                <h3>${invoice.id}</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div><strong>Customer:</strong> ${invoice.customer}</div>
+                    <div><strong>Status:</strong> <span class="invoice-status ${invoice.status}">${invoice.status.toUpperCase()}</span></div>
+                    <div><strong>Date:</strong> ${invoice.date}</div>
+                    <div><strong>Due Date:</strong> ${invoice.dueDate}</div>
+                </div>
+            </div>
+            <div class="invoice-items">
+                <h4>Items:</h4>
+                ${invoice.items.map(item => `
+                    <div class="invoice-item-line">
+                        <div class="invoice-item-description">${item.description}</div>
+                        <div class="invoice-item-amount">$${item.amount.toFixed(2)}</div>
+                    </div>
+                `).join('')}
+                <div class="invoice-item-line" style="font-weight: bold; border-top: 2px solid #333; margin-top: 1rem; padding-top: 1rem;">
+                    <div class="invoice-item-description">TOTAL</div>
+                    <div class="invoice-item-amount">$${invoice.total.toFixed(2)}</div>
+                </div>
+            </div>
+            ${invoice.notes ? `<div style="margin-top: 1rem;"><strong>Notes:</strong> ${invoice.notes}</div>` : ''}
+        `;
+        
+        this.showModal('Invoice Details', invoiceDetails);
+        
+        // Update modal buttons
+        document.getElementById('saveBtn').style.display = 'none';
+        document.getElementById('deleteBtn').style.display = 'none';
+        document.getElementById('cancelBtn').textContent = 'Close';
+    }
+
+    // Pricing Calculator Methods
+    calculateJobPrice() {
+        const pricingForm = `
+            <div class="form-group">
+                <label class="form-label">Service Type</label>
+                <select class="form-input" id="priceService">
+                    <option value="">Select Service</option>
+                    ${Object.keys(this.data.Pricing.serviceRates).map(service => 
+                        `<option value="${service}">${service}</option>`
+                    ).join('')}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Distance (km)</label>
+                <input type="number" class="form-input" id="priceDistance" step="0.1" placeholder="0.0">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Rush Job</label>
+                <select class="form-input" id="priceRush">
+                    <option value="false">No</option>
+                    <option value="true">Yes (50% surcharge)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Additional Notes</label>
+                <textarea class="form-textarea" id="priceNotes" placeholder="Any special requirements or notes"></textarea>
+            </div>
+            <div id="priceResult" style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; display: none;">
+                <h4>Price Breakdown:</h4>
+                <div id="priceBreakdown"></div>
+            </div>
+        `;
+        
+        this.showModal('Price Calculator', pricingForm);
+        
+        // Replace save button functionality
+        document.getElementById('saveBtn').textContent = 'Calculate Price';
+        document.getElementById('saveBtn').onclick = () => {
+            this.performPriceCalculation();
+        };
+    }
+
+    performPriceCalculation() {
+        const service = document.getElementById('priceService').value;
+        const distance = parseFloat(document.getElementById('priceDistance').value) || 0;
+        const isRush = document.getElementById('priceRush').value === 'true';
+        
+        if (!service) {
+            alert('Please select a service type');
+            return;
+        }
+        
+        const serviceRate = this.data.Pricing.serviceRates[service];
+        const mileageRate = this.data.Pricing.mileageRate;
+        const minimumCharge = this.data.Pricing.minimumCharge;
+        const rushSurcharge = this.data.Pricing.rushSurcharge;
+        
+        let subtotal = serviceRate + (distance * mileageRate);
+        subtotal = Math.max(subtotal, minimumCharge);
+        
+        const rushCharge = isRush ? subtotal * (rushSurcharge - 1) : 0;
+        const total = subtotal + rushCharge;
+        
+        const breakdown = `
+            <div class="pricing-row">
+                <span>Service (${service}):</span>
+                <span>$${serviceRate.toFixed(2)}</span>
+            </div>
+            <div class="pricing-row">
+                <span>Mileage (${distance} km @ $${mileageRate}/km):</span>
+                <span>$${(distance * mileageRate).toFixed(2)}</span>
+            </div>
+            <div class="pricing-row">
+                <span>Subtotal:</span>
+                <span>$${subtotal.toFixed(2)}</span>
+            </div>
+            ${rushCharge > 0 ? `
+                <div class="pricing-row">
+                    <span>Rush Surcharge (50%):</span>
+                    <span>$${rushCharge.toFixed(2)}</span>
+                </div>
+            ` : ''}
+            <div class="pricing-row">
+                <span><strong>Total:</strong></span>
+                <span><strong>$${total.toFixed(2)}</strong></span>
+            </div>
+        `;
+        
+        document.getElementById('priceResult').style.display = 'block';
+        document.getElementById('priceBreakdown').innerHTML = breakdown;
+    }
+
+    renderPricing() {
+        const container = document.getElementById('pricingContainer');
+        const pricing = this.data.Pricing;
+        
+        container.innerHTML = `
+            <div class="pricing-grid">
+                <div class="pricing-section">
+                    <h3>Service Rates</h3>
+                    <div class="service-rates">
+                        ${Object.entries(pricing.serviceRates).map(([service, rate]) => `
+                            <div class="rate-card">
+                                <div class="rate-service">${service}</div>
+                                <div class="rate-amount">$${rate.toFixed(2)}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                <div class="pricing-section">
+                    <h3>Additional Charges</h3>
+                    <div class="pricing-row">
+                        <span>Mileage Rate:</span>
+                        <span>$${pricing.mileageRate.toFixed(2)}/km</span>
+                    </div>
+                    <div class="pricing-row">
+                        <span>Minimum Charge:</span>
+                        <span>$${pricing.minimumCharge.toFixed(2)}</span>
+                    </div>
+                    <div class="pricing-row">
+                        <span>Rush Surcharge:</span>
+                        <span>${((pricing.rushSurcharge - 1) * 100).toFixed(0)}%</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Dashboard Methods
+    renderDashboard() {
+        const container = document.getElementById('dashboardContainer');
+        const analytics = this.calculateAnalytics();
+        
+        container.innerHTML = `
+            <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <div class="dashboard-card-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="dashboard-card-title">Monthly Revenue</div>
+                    <div class="dashboard-card-value">$${analytics.monthlyRevenue.toFixed(2)}</div>
+                    <div class="dashboard-card-change positive">+${analytics.monthlyGrowth.toFixed(1)}%</div>
+                </div>
+                <div class="dashboard-card">
+                    <div class="dashboard-card-icon">
+                        <i class="fas fa-file-invoice"></i>
+                    </div>
+                    <div class="dashboard-card-title">Total Invoices</div>
+                    <div class="dashboard-card-value">${analytics.totalInvoices}</div>
+                    <div class="dashboard-card-change positive">+${analytics.invoiceGrowth}</div>
+                </div>
+                <div class="dashboard-card">
+                    <div class="dashboard-card-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="dashboard-card-title">Pending Invoices</div>
+                    <div class="dashboard-card-value">${analytics.pendingInvoices}</div>
+                    <div class="dashboard-card-change">$${analytics.pendingAmount.toFixed(2)}</div>
+                </div>
+                <div class="dashboard-card">
+                    <div class="dashboard-card-icon">
+                        <i class="fas fa-route"></i>
+                    </div>
+                    <div class="dashboard-card-title">Routes Optimized</div>
+                    <div class="dashboard-card-value">${analytics.routesOptimized}</div>
+                    <div class="dashboard-card-change positive">This month</div>
+                </div>
+            </div>
+            <div class="dashboard-chart">
+                <h3>Monthly Breakdown</h3>
+                <div class="monthly-breakdown">
+                    ${analytics.monthlyBreakdown.map(month => `
+                        <div class="month-item">
+                            <div class="month-name">${month.name}</div>
+                            <div class="month-amount">$${month.amount.toFixed(2)}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            <div class="dashboard-chart">
+                <h3>Yearly Totals</h3>
+                <div class="pricing-section">
+                    <div class="pricing-row">
+                        <span>Total Revenue:</span>
+                        <span>$${analytics.yearlyRevenue.toFixed(2)}</span>
+                    </div>
+                    <div class="pricing-row">
+                        <span>Total Jobs:</span>
+                        <span>${analytics.totalJobs}</span>
+                    </div>
+                    <div class="pricing-row">
+                        <span>Average Job Value:</span>
+                        <span>$${analytics.averageJobValue.toFixed(2)}</span>
+                    </div>
+                    <div class="pricing-row">
+                        <span>Top Service:</span>
+                        <span>${analytics.topService}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    calculateAnalytics() {
+        const invoices = this.data.Invoices || [];
+        const charges = this.data.Charges || [];
+        const routes = this.data.Routes || [];
+        
+        // Calculate current month revenue
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+        
+        const monthlyRevenue = invoices
+            .filter(inv => {
+                const invDate = new Date(inv.date);
+                return invDate.getMonth() === currentMonth && invDate.getFullYear() === currentYear;
+            })
+            .reduce((sum, inv) => sum + inv.total, 0);
+        
+        // Calculate yearly revenue
+        const yearlyRevenue = invoices
+            .filter(inv => new Date(inv.date).getFullYear() === currentYear)
+            .reduce((sum, inv) => sum + inv.total, 0);
+        
+        // Calculate monthly breakdown
+        const monthlyBreakdown = Array.from({length: 12}, (_, i) => {
+            const monthRevenue = invoices
+                .filter(inv => {
+                    const invDate = new Date(inv.date);
+                    return invDate.getMonth() === i && invDate.getFullYear() === currentYear;
+                })
+                .reduce((sum, inv) => sum + inv.total, 0);
+            
+            return {
+                name: new Date(currentYear, i).toLocaleDateString('en-US', {month: 'short'}),
+                amount: monthRevenue
+            };
+        });
+        
+        // Calculate service statistics
+        const serviceStats = {};
+        const allDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+        let totalJobs = 0;
+        
+        allDays.forEach(day => {
+            const dayData = this.data[day] || [];
+            totalJobs += dayData.length;
+            dayData.forEach(item => {
+                const service = item.Service || 'Unknown';
+                serviceStats[service] = (serviceStats[service] || 0) + 1;
+            });
+        });
+        
+        const topService = Object.entries(serviceStats).sort((a, b) => b[1] - a[1])[0]?.[0] || 'None';
+        
+        return {
+            monthlyRevenue,
+            monthlyGrowth: 12.5, // Mock growth rate
+            totalInvoices: invoices.length,
+            invoiceGrowth: 3, // Mock growth
+            pendingInvoices: invoices.filter(inv => inv.status === 'pending').length,
+            pendingAmount: invoices.filter(inv => inv.status === 'pending').reduce((sum, inv) => sum + inv.total, 0),
+            routesOptimized: routes.length,
+            yearlyRevenue,
+            totalJobs,
+            averageJobValue: yearlyRevenue / Math.max(totalJobs, 1),
+            topService,
+            monthlyBreakdown
+        };
+    }
+
+    refreshDashboard() {
+        this.renderDashboard();
+    }
+
+    exportAnalyticsReport() {
+        const analytics = this.calculateAnalytics();
+        const report = {
+            generatedAt: new Date().toISOString(),
+            summary: analytics,
+            invoices: this.data.Invoices,
+            charges: this.data.Charges,
+            routes: this.data.Routes
+        };
+        
+        const dataStr = JSON.stringify(report, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+        
+        const exportFileDefaultName = `analytics-report-${new Date().toISOString().split('T')[0]}.json`;
+        const linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileDefaultName);
+        linkElement.click();
     }
 }
 

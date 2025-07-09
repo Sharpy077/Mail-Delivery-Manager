@@ -319,7 +319,7 @@ body {
 }
 
 /* Contacts */
-.contacts-header, .adhoc-header {
+.contacts-header, .adhoc-header, .routes-header, .invoicing-header, .pricing-header, .dashboard-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -328,9 +328,15 @@ body {
     gap: 1rem;
 }
 
-.contacts-header h2, .adhoc-header h2 {
+.contacts-header h2, .adhoc-header h2, .routes-header h2, .invoicing-header h2, .pricing-header h2, .dashboard-header h2 {
     color: #333;
     font-size: 1.5rem;
+}
+
+.routes-actions, .invoicing-actions, .dashboard-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
 }
 
 .contacts-container, .adhoc-container {
@@ -669,4 +675,446 @@ body {
     background: #d1ecf1;
     color: #0c5460;
     border: 1px solid #bee5eb;
+}
+
+/* Route Optimization Styles */
+.routes-container {
+    display: grid;
+    gap: 1rem;
+}
+
+.route-item {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.route-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.route-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.route-distance {
+    background: #e8f5e8;
+    color: #2e7d32;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.route-stops {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.route-stop {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+}
+
+.stop-number {
+    background: #667eea;
+    color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.stop-details {
+    flex: 1;
+}
+
+.stop-business {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.25rem;
+}
+
+.stop-address {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.stop-time {
+    color: #667eea;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+/* Invoicing Styles */
+.invoicing-container {
+    display: grid;
+    gap: 1rem;
+}
+
+.invoice-item {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.invoice-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    border-color: #667eea;
+}
+
+.invoice-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.invoice-number {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.invoice-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.invoice-status.paid {
+    background: #e8f5e8;
+    color: #2e7d32;
+}
+
+.invoice-status.pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.invoice-status.overdue {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.invoice-customer {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.invoice-date {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.invoice-amount {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #667eea;
+    margin-bottom: 1rem;
+}
+
+.invoice-items {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+.invoice-item-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.invoice-item-line:last-child {
+    border-bottom: none;
+}
+
+.invoice-item-description {
+    flex: 1;
+    font-size: 0.9rem;
+    color: #495057;
+}
+
+.invoice-item-amount {
+    font-weight: 600;
+    color: #333;
+}
+
+/* Pricing Calculator Styles */
+.pricing-container {
+    display: grid;
+    gap: 2rem;
+}
+
+.pricing-form {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.pricing-results {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.pricing-section {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.pricing-section h3 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.pricing-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.pricing-row:last-child {
+    border-bottom: none;
+    font-weight: 600;
+    color: #667eea;
+    font-size: 1.1rem;
+}
+
+.service-rates {
+    display: grid;
+    gap: 1rem;
+}
+
+.rate-card {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.rate-card:hover {
+    background: #e3f2fd;
+    border-color: #667eea;
+}
+
+.rate-service {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.rate-amount {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #667eea;
+}
+
+/* Dashboard Styles */
+.dashboard-container {
+    display: grid;
+    gap: 2rem;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.dashboard-card {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.dashboard-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    border-color: #667eea;
+}
+
+.dashboard-card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: #667eea;
+}
+
+.dashboard-card-title {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dashboard-card-value {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.dashboard-card-change {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.dashboard-card-change.positive {
+    color: #2e7d32;
+}
+
+.dashboard-card-change.negative {
+    color: #d32f2f;
+}
+
+.dashboard-chart {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.dashboard-chart h3 {
+    color: #333;
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+}
+
+.chart-placeholder {
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    border: 2px dashed #e9ecef;
+    border-radius: 8px;
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+.monthly-breakdown {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.month-item {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.month-name {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.month-amount {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #667eea;
+}
+
+/* Charge Management Styles */
+.charge-item {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.charge-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    border-color: #667eea;
+}
+
+.charge-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.charge-type {
+    background: #fff3cd;
+    color: #856404;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.charge-amount {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #667eea;
+}
+
+.charge-description {
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.charge-date {
+    color: #6c757d;
+    font-size: 0.9rem;
 }
