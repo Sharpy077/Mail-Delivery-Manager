@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work Schedule Manager</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-calendar-alt"></i> Work Schedule Manager</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" id="exportBtn">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                    <button class="btn btn-secondary" id="importBtn">
+                        <i class="fas fa-upload"></i> Import
+                    </button>
+                    <button class="btn btn-secondary" id="resetBtn">
+                        <i class="fas fa-refresh"></i> Reset
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav-tabs">
+            <button class="nav-tab active" data-tab="schedule">
+                <i class="fas fa-calendar-week"></i> Schedule
+            </button>
+            <button class="nav-tab" data-tab="contacts">
+                <i class="fas fa-address-book"></i> Contacts
+            </button>
+            <button class="nav-tab" data-tab="adhoc">
+                <i class="fas fa-clock"></i> Ad-hoc
+            </button>
+        </nav>
+
+        <!-- Search and Filter -->
+        <div class="search-container">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search businesses, addresses, or contacts...">
+            </div>
+            <div class="filter-controls">
+                <select id="dayFilter">
+                    <option value="">All Days</option>
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                </select>
+                <select id="serviceFilter">
+                    <option value="">All Services</option>
+                    <option value="Aus Post">Australia Post</option>
+                    <option value="Secure Cash">Secure Cash</option>
+                    <option value="Mail Plus">Mail Plus</option>
+                    <option value="Banking">Banking</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Schedule Tab -->
+            <div class="tab-content active" id="schedule-tab">
+                <div class="day-selector">
+                    <button class="day-btn active" data-day="Monday">Mon</button>
+                    <button class="day-btn" data-day="Tuesday">Tue</button>
+                    <button class="day-btn" data-day="Wednesday">Wed</button>
+                    <button class="day-btn" data-day="Thursday">Thu</button>
+                    <button class="day-btn" data-day="Friday">Fri</button>
+                </div>
+                <div class="schedule-container" id="scheduleContainer">
+                    <!-- Schedule items will be populated here -->
+                </div>
+            </div>
+
+            <!-- Contacts Tab -->
+            <div class="tab-content" id="contacts-tab">
+                <div class="contacts-header">
+                    <h2>Customer Contacts</h2>
+                    <button class="btn btn-primary" id="addContactBtn">
+                        <i class="fas fa-plus"></i> Add Contact
+                    </button>
+                </div>
+                <div class="contacts-container" id="contactsContainer">
+                    <!-- Contacts will be populated here -->
+                </div>
+            </div>
+
+            <!-- Ad-hoc Tab -->
+            <div class="tab-content" id="adhoc-tab">
+                <div class="adhoc-header">
+                    <h2>Ad-hoc Services</h2>
+                    <button class="btn btn-primary" id="addAdhocBtn">
+                        <i class="fas fa-plus"></i> Add Ad-hoc
+                    </button>
+                </div>
+                <div class="adhoc-container" id="adhocContainer">
+                    <!-- Ad-hoc items will be populated here -->
+                </div>
+            </div>
+        </main>
+
+        <!-- Floating Action Button -->
+        <button class="fab" id="addEntryBtn">
+            <i class="fas fa-plus"></i>
+        </button>
+    </div>
+
+    <!-- Modal for editing entries -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Edit Entry</h3>
+                <button class="close-btn" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Form fields will be populated here -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                <button class="btn btn-primary" id="saveBtn">Save</button>
+                <button class="btn btn-danger" id="deleteBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- File input for import -->
+    <input type="file" id="fileInput" accept=".json" style="display: none;">
+
+    <script src="data-loader.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
